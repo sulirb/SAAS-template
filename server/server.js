@@ -1,19 +1,30 @@
 const express = require("express");
 const cors = require("cors");
+const { sequelize, testConnection } = require("./config/database");
 const routes = require("./routes");
 
 const app = express();
 
-// Enable CORS for all routes
+// Middleware
 app.use(cors());
-
-// Parse JSON bodies
 app.use(express.json());
 
-// Use your routes
+// Routes
 app.use("/api", routes);
 
+// Test database connection
+testConnection();
+
+// Sync models and start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+sequelize
+  .sync({ force: false })
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("Unable to sync database:", err);
+  });

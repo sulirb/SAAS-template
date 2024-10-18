@@ -63,11 +63,16 @@ exports.signup = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const newUser = await User.create({
       email,
       password: hashedPassword,
       verificationCode,
     });
+
+    if (!User) {
+      console.error("User model is not properly imported");
+      // You might want to throw an error here or handle it appropriately
+    }
 
     console.log("User saved successfully");
 

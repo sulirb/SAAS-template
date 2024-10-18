@@ -1,5 +1,5 @@
 const { Sequelize } = require("sequelize");
-require("dotenv").config();
+const userModel = require("./user");
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -18,15 +18,9 @@ const sequelize = new Sequelize(
   }
 );
 
-const testConnection = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log(
-      "Connection to the database has been established successfully."
-    );
-  } catch (error) {
-    console.error("Unable to connect to the database:", error);
-  }
-};
+const User = userModel(sequelize);
 
-module.exports = { sequelize, testConnection };
+module.exports = {
+  sequelize,
+  User,
+};
