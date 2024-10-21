@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "server": "nodemon server/server.js",
-    "node": "node server/server.js"
+    "server": "nodemon server/index.js",
+    "node": "node server/index.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -45,6 +45,8 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "express-async-errors": "^3.1.1",
+    "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.453.0",
     "mysql2": "^3.11.3",

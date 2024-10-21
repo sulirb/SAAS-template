@@ -1,51 +1,48 @@
-const { User } = require("../models/User");
+// Import required modules and models
+const User = require("../../models/SQLUser");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const express = require("express");
 const nodemailer = require("nodemailer");
-const { HttpError } = require("../middlewares/error");
-const jwt = require("../utils/jwt.js");
+const { HttpError } = require("../../middlewares/error");
 
+// Create an Express router
+let route = express.Router({ mergeParams: true });
+
+// Configure nodemailer transporter for sending emails
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp.gmail.com", // you can choose another mail provider
   port: 465,
   secure: true,
   auth: {
-    user: "your_email@gmail.com",
-    pass: "###",
+    user: "losc596@gmail.com",
+    pass: "tugl ixlt pmzv rkac",
   },
 });
 
-exports.login = async (req, res, next) => {
-  const LOGIN_ERROR = "Incorrect email or password";
-
-  try {
-    const { email, password } = req.body;
-
-    const user = await User.findOne({ where: { email } });
-
-    if (!user) throw new HttpError(401, LOGIN_ERROR);
-
-    const valid = await bcrypt.compare(password, user.password);
-
-    if (!valid) throw new HttpError(401, LOGIN_ERROR);
-
-    const userId = user.id;
-
-    res.status(200).json({ userId, token: jwt.sign({ userId }) });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.signup = async (req, res, next) => {
+// Define the signup route
+route.post("/", async (req, res) => {
   try {
     console.log("Starting signup process");
+    // Check if a user with the same email address already exists
+    /*const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      // User with the same email address already exists, return an error
+      throw new HttpError(400, {
+        message: "User with this email address already exists",
+      });
+    }*/
+
+    // Extract email and password from request body
     const { email, password } = req.body;
     console.log("Received email:", email);
 
+    // Generate a 6-digit verification code
     const verificationCode = crypto.randomInt(100000, 999999);
     console.log("Generated verification code:", verificationCode);
 
+    // Prepare email content with verification code
     const mailOptions = {
       from: "your_email@gmail.com",
       to: email,
@@ -61,33 +58,34 @@ exports.signup = async (req, res, next) => {
       `,
     };
 
+    // Hash the password for security
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await User.create({
+    // Create a new user with email, hashed password, and verification code
+    const user = new User({
       email,
       password: hashedPassword,
       verificationCode,
     });
 
-    if (!User) {
-      console.error("User model is not properly imported");
-      // You might want to throw an error here or handle it appropriately
-    }
-
+    // Save the new user to the database
+    await user.save();
     console.log("User saved successfully");
 
+    // Send the verification email
     await transporter.sendMail(mailOptions);
     console.log("Email sent successfully");
 
+    // Send a success response
     res.status(201).json({
       message: "User created. Check your email for the verification code.",
     });
   } catch (error) {
+    // Log any errors and throw an HTTP error
     console.error("Detailed error:", error);
-    if (error.name === "SequelizeUniqueConstraintError") {
-      next(new HttpError(400, { message: "Email already exists" }));
-    } else {
-      next(new HttpError(500, { message: "Registration failed" }));
-    }
+    throw new HttpError(500, { message: "Registration failed" });
   }
-};
+});
+
+// Export the router for use in other parts of the application
+module.exports = route;
