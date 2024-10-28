@@ -41,7 +41,7 @@ const User = sequelize.define("User", {
 });
 
 // Synchronize the model with the database
-User.sync({ force: true });
+User.sync({ force: false });
 
 // Export the User model
 module.exports = User;
