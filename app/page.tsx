@@ -16,7 +16,10 @@ export default function Home() {
             <Button className="mr-4">S'inscrire</Button>
           </Link>
           <Link href="/login" passHref>
-            <Button variant="outline">Se connecter</Button>
+            <Button className="me-2">Se connecter</Button>
+          </Link>
+          <Link href="/dashboard" passHref>
+            <Button className="me-2">Dashboard</Button>
           </Link>
         </div>
       </main>
