@@ -5,9 +5,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BarChart, List, ShoppingCart, Users } from "lucide-react";
+import { useCookies } from "react-cookie";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) {
+      router.push("/error");
+    } else {
+      setIsLoading(false);
+    }
+  }, [token, router]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen bg-gray-100">

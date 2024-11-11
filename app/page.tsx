@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useCookies } from "react-cookie";
+import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   Card,
@@ -16,6 +17,7 @@ import { Check } from "lucide-react";
 
 export default function Home() {
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [token, setToken] = useState(null);
 
@@ -25,8 +27,20 @@ export default function Home() {
   }, [cookies.token]);
 
   const handleLogout = () => {
-    window.location.href = "/";
     removeCookie("token");
+    router.push("/");
+  };
+
+  const handlePlanClick = (planName) => {
+    if (token) {
+      if (planName === "Gratuit") {
+        router.push("/dashboard");
+      } else {
+        router.push("/payment");
+      }
+    } else {
+      router.push("/login");
+    }
   };
 
   if (!isClient) {
@@ -129,10 +143,7 @@ export default function Home() {
                 <CardFooter>
                   <Button
                     className="w-full"
-                    onClick={() =>
-                      (window.location.href =
-                        plan.name === "Gratuit" ? "/dashboard" : "/pricing")
-                    }
+                    onClick={() => handlePlanClick(plan.name)}
                   >
                     {plan.name === "Gratuit" ? "Commencer" : "S'abonner"}
                   </Button>

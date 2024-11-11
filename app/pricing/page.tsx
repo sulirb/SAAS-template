@@ -10,6 +10,26 @@ import {
 import { Check } from "lucide-react";
 
 export default function Pricing() {
+  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+  const [isClient, setIsClient] = useState(false);
+  const [token, setToken] = useState(null);
+
+  const handlePlanClick = (planName) => {
+    if (token) {
+      if (planName === "Gratuit") {
+        router.push("/dashboard");
+      } else {
+        router.push("/payment");
+      }
+    } else {
+      router.push("/login");
+    }
+  };
+
+  if (!isClient) {
+    return null; // Ou un placeholder, comme un loader
+  }
+
   const plans = [
     {
       name: "Gratuit",
@@ -85,7 +105,10 @@ export default function Pricing() {
                 </ul>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">
+                <Button
+                  className="w-full"
+                  onClick={() => handlePlanClick(plan.name)}
+                >
                   {plan.name === "Gratuit" ? "Commencer" : "S'abonner"}
                 </Button>
               </CardFooter>
