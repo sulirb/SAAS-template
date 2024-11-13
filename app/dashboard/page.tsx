@@ -43,19 +43,19 @@ export default function Dashboard() {
             Dashboard
           </a>
           <a
-            href="#"
+            href="/dashboard/mes-listes"
             className="block py-2 px-4 text-gray-700 hover:bg-gray-200"
           >
             Mes Listes
           </a>
           <a
-            href="#"
+            href="/dashboard/stock-magasins"
             className="block py-2 px-4 text-gray-700 hover:bg-gray-200"
           >
             Stock Magasins
           </a>
           <a
-            href="#"
+            href="/dashboard/parametres"
             className="block py-2 px-4 text-gray-700 hover:bg-gray-200"
           >
             Paramètres

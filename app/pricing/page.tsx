@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,6 +10,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import { useCookies } from "react-cookie";
+import { useState } from "react";
 
 export default function Pricing() {
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
