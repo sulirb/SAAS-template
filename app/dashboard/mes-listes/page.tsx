@@ -14,6 +14,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2 } from "lucide-react";
+import { useCookies } from "react-cookie";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function MesListes() {
   const [newListName, setNewListName] = useState("");
@@ -22,6 +25,22 @@ export default function MesListes() {
     { id: 2, name: "Fête d'anniversaire", items: 8, completed: 2 },
     { id: 3, name: "Pique-nique du weekend", items: 6, completed: 0 },
   ]);
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) {
+      router.push("/error");
+    } else {
+      setIsLoading(false);
+    }
+  }, [token, router]);
+
+  if (isLoading) {
+    return null;
+  }
 
   const handleAddList = () => {
     if (newListName.trim()) {

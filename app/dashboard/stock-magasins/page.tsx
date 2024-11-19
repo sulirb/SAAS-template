@@ -20,6 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search } from "lucide-react";
+import { useCookies } from "react-cookie";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function StockMagasins() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,6 +66,23 @@ export default function StockMagasins() {
       (selectedStore === "all" || product.store === selectedStore) &&
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) {
+      router.push("/error");
+    } else {
+      setIsLoading(false);
+    }
+  }, [token, router]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <>

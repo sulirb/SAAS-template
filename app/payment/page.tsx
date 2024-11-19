@@ -23,6 +23,10 @@ import {
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
+);
+
 export default function PaymentPage() {
   const router = useRouter();
   const [cardNumber, setCardNumber] = useState("");

@@ -21,12 +21,31 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCookies } from "react-cookie";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Parametres() {
   const [email, setEmail] = useState("utilisateur@example.com");
   const [notifications, setNotifications] = useState(true);
   const [theme, setTheme] = useState("light");
   const [language, setLanguage] = useState("fr");
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) {
+      router.push("/error");
+    } else {
+      setIsLoading(false);
+    }
+  }, [token, router]);
+
+  if (isLoading) {
+    return null;
+  }
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
