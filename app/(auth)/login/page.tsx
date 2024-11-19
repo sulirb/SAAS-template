@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCookies } from "react-cookie";
 import axios from "axios";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -148,6 +149,12 @@ const Login: React.FC = () => {
               <AlertDescription>{message}</AlertDescription>
             </Alert>
           )}
+          <p className="text-center text-sm w-full">
+            Vous n'avez pas de compte ?{" "}
+            <Link href="/register" className="text-primary hover:underline">
+              S'inscrire
+            </Link>
+          </p>
         </CardFooter>
       </Card>
     </div>
