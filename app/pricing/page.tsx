@@ -11,12 +11,12 @@ import {
 } from "@/components/ui/card";
 import { Check } from "lucide-react";
 import { useCookies } from "react-cookie";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Pricing() {
-  const [cookies, setCookie, removeCookie] = useCookies(["token"]);
-  const [isClient, setIsClient] = useState(false);
-  const [token, setToken] = useState(null);
+  const [cookies] = useCookies(["token"]);
+  const token = cookies.token;
+  const router = useRouter();
 
   const handlePlanClick = (planName) => {
     if (token) {
@@ -29,10 +29,6 @@ export default function Pricing() {
       router.push("/login");
     }
   };
-
-  if (!isClient) {
-    return null; // Ou un placeholder, comme un loader
-  }
 
   const plans = [
     {

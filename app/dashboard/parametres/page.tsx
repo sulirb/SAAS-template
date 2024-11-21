@@ -87,6 +87,12 @@ export default function Parametres() {
             >
               Paramètres
             </a>
+            <a
+              href="/pricing"
+              className="block py-2 px-4 text-gray-700 hover:bg-gray-200"
+            >
+              Tarifs
+            </a>
           </nav>
         </div>
         <div className="flex-1 overflow-y-auto p-8">
