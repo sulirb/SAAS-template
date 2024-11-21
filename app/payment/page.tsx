@@ -1,7 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements,
+} from "@stripe/react-stripe-js";
 import {
   Card,
   CardContent,
@@ -20,43 +27,75 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Info } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
 
-export default function PaymentPage() {
+const plans = [
+  { id: "premium", name: "Premium", price: 999 },
+  { id: "business", name: "Business", price: 2499 },
+];
+
+function CheckoutForm() {
   const router = useRouter();
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardName, setCardName] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [plan, setPlan] = useState("premium");
+  const [selectedPlan, setSelectedPlan] = useState(plans[0]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [cardholderName, setCardholderName] = useState("");
+
+  const stripe = useStripe();
+  const elements = useElements();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!stripe || !elements) {
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
-    // Ici, vous intégreriez normalement avec votre API de paiement
-    // Ceci est une simulation de traitement de paiement
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simule une requête API
+      const { error: backendError, clientSecret } = await fetch(
+        "/api/create-payment-intent",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            price: selectedPlan.price,
+            planName: selectedPlan.name,
+          }),
+        }
+      ).then((r) => r.json());
 
-      // Simule une vérification basique
-      if (cardNumber.length !== 16 || cvv.length !== 3) {
-        throw new Error("Informations de carte invalides");
+      if (backendError) {
+        setError(backendError.message);
+        return;
       }
 
-      setSuccess(true);
-      // Rediriger vers le tableau de bord après un paiement réussi
-      setTimeout(() => router.push("/dashboard"), 2000);
-    } catch (err) {
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement)!,
+            billing_details: {
+              name: cardholderName,
+            },
+          },
+        });
+
+      if (stripeError) {
+        setError(
+          stripeError.message || "Une erreur est survenue lors du paiement"
+        );
+      } else if (paymentIntent.status === "succeeded") {
+        router.push("/success");
+      }
+    } catch (err: any) {
       setError(
         err.message || "Une erreur est survenue lors du traitement du paiement"
       );
@@ -65,21 +104,66 @@ export default function PaymentPage() {
     }
   };
 
-  if (success) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <Alert className="max-w-md">
-          <CheckCircle2 className="h-4 w-4" />
-          <AlertTitle>Paiement réussi !</AlertTitle>
-          <AlertDescription>
-            Votre abonnement a été activé. Vous allez être redirigé vers votre
-            tableau de bord.
-          </AlertDescription>
-        </Alert>
+  return (
+    <form onSubmit={handleSubmit}>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="plan">Plan d&apos;abonnement</Label>
+          <Select
+            value={selectedPlan.id}
+            onValueChange={(value) =>
+              setSelectedPlan(
+                plans.find((plan) => plan.id === value) || plans[0]
+              )
+            }
+          >
+            <SelectTrigger id="plan">
+              <SelectValue placeholder="Sélectionnez un plan" />
+            </SelectTrigger>
+            <SelectContent>
+              {plans.map((plan) => (
+                <SelectItem key={plan.id} value={plan.id}>
+                  {plan.name} - {(plan.price / 100).toFixed(2)}€/mois
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="cardholderName">Nom du titulaire de la carte</Label>
+          <Input
+            id="cardholderName"
+            value={cardholderName}
+            onChange={(e) => setCardholderName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="card-element">Informations de carte</Label>
+          <div className="p-3 border rounded-md">
+            <CardElement id="card-element" />
+          </div>
+        </div>
       </div>
-    );
-  }
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <Button
+        type="submit"
+        className="w-full mt-4"
+        disabled={isLoading || !stripe}
+      >
+        {isLoading ? "Traitement..." : "Payer"}
+      </Button>
+    </form>
+  );
+}
 
+export default function PaymentPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <Card className="w-full max-w-md">
@@ -90,90 +174,20 @@ export default function PaymentPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="plan">Plan d&apos;abonnement</Label>
-                <Select value={plan} onValueChange={setPlan}>
-                  <SelectTrigger id="plan">
-                    <SelectValue placeholder="Sélectionnez un plan" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="premium">
-                      Premium - 9,99€/mois
-                    </SelectItem>
-                    <SelectItem value="business">
-                      Business - 24,99€/mois
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardNumber">Numéro de carte</Label>
-                <Input
-                  id="cardNumber"
-                  placeholder="1234 5678 9012 3456"
-                  value={cardNumber}
-                  onChange={(e) =>
-                    setCardNumber(
-                      e.target.value.replace(/\D/g, "").slice(0, 16)
-                    )
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cardName">Nom sur la carte</Label>
-                <Input
-                  id="cardName"
-                  placeholder="J. Smith"
-                  value={cardName}
-                  onChange={(e) => setCardName(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="expiryDate">Date d&apos;expiration</Label>
-                  <Input
-                    id="expiryDate"
-                    placeholder="MM/AA"
-                    value={expiryDate}
-                    onChange={(e) => setExpiryDate(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="cvv">CVV</Label>
-                  <Input
-                    id="cvv"
-                    placeholder="123"
-                    value={cvv}
-                    onChange={(e) =>
-                      setCvv(e.target.value.replace(/\D/g, "").slice(0, 3))
-                    }
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Erreur</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </form>
+          <Elements stripe={stripePromise}>
+            <CheckoutForm />
+          </Elements>
         </CardContent>
         <CardFooter>
-          <Button
-            className="w-full"
-            onClick={handleSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? "Traitement..." : "Payer maintenant"}
-          </Button>
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertTitle>Mode Test</AlertTitle>
+            <AlertDescription>
+              Pour tester, utilisez le numéro de carte 4242 4242 4242 4242, une
+              date d&apos;expiration future, et n&apos;importe quel CVC à 3
+              chiffres.
+            </AlertDescription>
+          </Alert>
         </CardFooter>
       </Card>
     </div>
