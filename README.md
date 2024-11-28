@@ -83,7 +83,7 @@ npm run dev
 yarn dev
 ```
 
-2. Ouvrez votre navigateur et accédez à [http://localhost:1000](http://localhost:1000)
+2. Ouvrez votre navigateur et accédez à [http://localhost:1000](http://localhost:1000) si vous avez spécifié PORT=1000 dans le fichier `.env`
 
 ## 📱 Fonctionnalités principales
 
@@ -119,55 +119,9 @@ Pour toutes les cartes de test :
 - CVC : N'importe quel nombre à 3 chiffres
 - Code postal : N'importe quel code postal valide
 
-## 🛠️ Structure du projet
-
-```plaintext
-grocerylist-pro/
-├── app/
-│   ├── api/
-│   │   ├── auth/
-│   │   └── create-payment-intent/
-│   ├── dashboard/
-│   │   ├── mes-listes/
-│   │   ├── stock-magasins/
-│   │   └── parametres/
-│   ├── success/
-│   └── canceled/
-├── components/
-│   └── ui/
-├── lib/
-│   ├── db.js
-│   └── stripe.js
-├── public/
-└── .env
-```
-
-## 🤝 Contribution
-
-Les contributions sont les bienvenues ! Pour contribuer :
-
-1. Forkez le projet
-2. Créez votre branche de fonctionnalité (`git checkout -b feature/AmazingFeature`)
-3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
-4. Poussez vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une Pull Request
-
-## 📝 Licence
-
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
-
 ## 🆘 Support
 
 Si vous rencontrez des problèmes ou avez des questions :
 
 - Ouvrez une issue sur GitHub
 - Contactez notre support à [support@grocerylist-pro.com](mailto:support@grocerylist-pro.com)
-
----
-
-Développé avec ❤️ par l'équipe GroceryList Pro
-
-```plaintext
-
-Ce README réécrit fournit une vue d'ensemble complète du projet GroceryList P
-```
