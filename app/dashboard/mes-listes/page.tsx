@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,48 +12,74 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2 } from "lucide-react";
-import { useCookies } from "react-cookie";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+interface GroceryList {
+  id: number;
+  name: string;
+  items: number;
+  completed: number;
+}
 
 export default function MesListes() {
   const [newListName, setNewListName] = useState("");
-  const [lists, setLists] = useState([
-    { id: 1, name: "Courses hebdomadaires", items: 12, completed: 5 },
-    { id: 2, name: "Fête d'anniversaire", items: 8, completed: 2 },
-    { id: 3, name: "Pique-nique du weekend", items: 6, completed: 0 },
-  ]);
-  const [cookies] = useCookies(["token"]);
-  const token = cookies.token;
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const [lists, setLists] = useState<GroceryList[]>([]);
 
   useEffect(() => {
-    if (!token) {
-      router.push("/error");
-    } else {
-      setIsLoading(false);
-    }
-  }, [token, router]);
+    fetchLists();
+  }, []);
 
-  if (isLoading) {
-    return null;
-  }
-
-  const handleAddList = () => {
-    if (newListName.trim()) {
-      setLists([
-        ...lists,
-        { id: Date.now(), name: newListName, items: 0, completed: 0 },
-      ]);
-      setNewListName("");
+  const fetchLists = async () => {
+    try {
+      const response = await fetch("/api/lists");
+      if (response.ok) {
+        const data = await response.json();
+        setLists(data);
+      } else {
+        console.error("Failed to fetch lists");
+      }
+    } catch (error) {
+      console.error("Error fetching lists:", error);
     }
   };
 
-  const handleDeleteList = (id: number) => {
-    setLists(lists.filter((list) => list.id !== id));
+  const handleAddList = async () => {
+    if (newListName.trim()) {
+      try {
+        const response = await fetch("/api/lists", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ name: newListName }),
+        });
+
+        if (response.ok) {
+          setNewListName("");
+          fetchLists();
+        } else {
+          console.error("Failed to add list");
+        }
+      } catch (error) {
+        console.error("Error adding list:", error);
+      }
+    }
+  };
+
+  const handleDeleteList = async (id: number) => {
+    try {
+      const response = await fetch(`/api/lists/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        fetchLists();
+      } else {
+        console.error("Failed to delete list");
+      }
+    } catch (error) {
+      console.error("Error deleting list:", error);
+    }
   };
 
   return (

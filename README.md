@@ -18,7 +18,7 @@ Avant de commencer, assurez-vous d'avoir installé les éléments suivants :
 1. Clonez le dépôt :
 
    ```bash
-   git clone https://github.com/votre-username/saas-test.git
+   git clone https://github.com/votre-username/saas-template.git
    cd saas-test
 
    ```
