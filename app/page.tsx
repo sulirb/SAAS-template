@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   const [cookies, setCookie, removeCookie] = useCookies(["token"]);
@@ -33,18 +34,14 @@ export default function Home() {
 
   const handlePlanClick = (planName) => {
     if (token) {
-      if (planName === "Gratuit") {
-        router.push("/dashboard");
-      } else {
-        router.push("/payment");
-      }
+      router.push(planName === "Gratuit" ? "/dashboard" : "/payment");
     } else {
       router.push("/login");
     }
   };
 
   if (!isClient) {
-    return null; // Ou un placeholder, comme un loader
+    return null;
   }
 
   const plans = [
@@ -85,64 +82,77 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <main className="flex flex-col items-center justify-center w-full flex-1 px-4 sm:px-20 text-center">
-        <h1 className="text-4xl sm:text-6xl font-bold mb-4">
-          Bienvenue sur <span className="text-blue-600">GroceryList Pro</span>
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 py-12 bg-white text-gray-900">
+      <main className="w-full max-w-6xl text-center">
+        <h1 className="text-5xl font-extrabold mb-6">
+          Gérez vos liste de course avec simplicité
         </h1>
-        <p className="mt-3 text-xl sm:text-2xl mb-8">
-          La solution tout-en-un pour votre entreprise
+        <p className="text-lg text-gray-600 mb-8">
+          Un outil complet pour planifier vos courses.
         </p>
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
+        <div className="flex justify-center gap-4 mb-12">
           {token ? (
             <>
-              <Link href="/dashboard" passHref>
-                <Button>Dashboard</Button>
+              <Link href="/dashboard">
+                <Button className="px-6 py-3 text-lg">
+                  Accéder au tableau de bord
+                </Button>
               </Link>
-              <Button onClick={handleLogout}>Se déconnecter</Button>
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                className="px-6 py-3 text-lg"
+              >
+                Se déconnecter
+              </Button>
             </>
           ) : (
             <>
-              <Link href="/register" passHref>
-                <Button>S&apos;inscrire</Button>
+              <Link href="/register">
+                <Button className="px-6 py-3 text-lg">S'inscrire</Button>
               </Link>
-              <Link href="/login" passHref>
-                <Button>Se connecter</Button>
+              <Link href="/login">
+                <Button variant="outline" className="px-6 py-3 text-lg">
+                  Se connecter
+                </Button>
               </Link>
             </>
           )}
         </div>
 
-        <section className="w-full max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">Nos offres</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <section className="w-full mt-12">
+          <h2 className="text-4xl font-bold mb-8">Nos offres</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {plans.map((plan) => (
-              <Card key={plan.name} className="flex flex-col justify-between">
-                <CardHeader>
+              <Card
+                key={plan.name}
+                className="shadow-lg border border-gray-200 rounded-2xl overflow-hidden"
+              >
+                <CardHeader className="bg-gray-100 p-6">
                   <CardTitle className="text-2xl font-semibold">
                     {plan.name}
                   </CardTitle>
-                  <CardDescription className="text-sm">
-                    {plan.description}
-                  </CardDescription>
+                  <CardDescription>{plan.description}</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold mb-4">
+                <CardContent className="p-6">
+                  <div className="text-4xl font-bold text-blue-600 mb-4">
                     {plan.price}
-                    <span className="text-base font-normal">/mois</span>
+                    <span className="text-lg font-normal text-gray-500">
+                      /mois
+                    </span>
                   </div>
-                  <ul className="space-y-2 text-left">
+                  <ul className="space-y-3 text-left text-gray-700">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-center">
-                        <Check className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                        <Check className="h-5 w-5 text-green-500 mr-2" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="p-6 bg-gray-50">
                   <Button
-                    className="w-full"
+                    className="w-full py-3 text-lg"
                     onClick={() => handlePlanClick(plan.name)}
                   >
                     {plan.name === "Gratuit" ? "Commencer" : "S'abonner"}
